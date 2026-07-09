@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EaglePips — Income</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="topnav-inner">
+    <div class="brand"><span class="dot">●</span> EaglePips <span class="sub">Money Management</span></div>
+    <div class="navlinks">
+      <a href="index.html" data-page="overview">Overview</a>
+      <a href="spendings.html" data-page="spendings">Spendings</a>
+      <a href="income.html" data-page="income">Income</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow">Venituri</div>
+    <h1 class="title">Adaugă un <span class="accent">venit</span>.</h1>
+    <p class="subtitle">Salariu, vânzări FlowerStation, payout-uri prop firm, profit din trading.</p>
+  </header>
+
+  <div class="two-col">
+    <div class="panel">
+      <div class="panel-head"><h3>Venit nou</h3></div>
+      <form id="incomeForm">
+        <input type="hidden" id="incomeId">
+        <div class="form-grid">
+          <div class="field full">
+            <label for="category">Sursă</label>
+            <select id="category"></select>
+          </div>
+          <div class="field">
+            <label for="amount">Sumă (lei)</label>
+            <input type="number" id="amount" placeholder="4500" step="0.01" required>
+          </div>
+          <div class="field">
+            <label for="date">Dată</label>
+            <input type="date" id="date" required>
+          </div>
+          <div class="field full">
+            <label for="notes">Notă (opțional)</label>
+            <textarea id="notes" placeholder="ex: payout The5ers iulie, salariu KRKA..."></textarea>
+          </div>
+        </div>
+        <button type="submit" class="btn primary full" id="submitBtn">Adaugă venitul</button>
+      </form>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h3>Venituri înregistrate</h3>
+        <span class="hint" id="filteredTotal"></span>
+      </div>
+      <div class="filter-row">
+        <select id="monthFilter"></select>
+        <select id="catFilter"></select>
+      </div>
+      <div class="tx-list" id="incomeList"></div>
+    </div>
+  </div>
+
+  <footer>
+    <span>EaglePips Money Management · datele sunt salvate local în acest browser</span>
+    <span id="totalCount"></span>
+  </footer>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+MM.highlightNav('income');
+
+const catSelect = document.getElementById('category');
+MM.INCOME_CATEGORIES.forEach(c => {
+  const o = document.createElement('option'); o.value = c; o.textContent = c;
+  catSelect.appendChild(o);
+});
+
+document.getElementById('date').value = new Date().toISOString().slice(0,10);
+
+let editingId = null;
+
+function populateFilters(){
+  const income = MM.loadIncome();
+  const months = [...new Set(income.map(t => MM.monthKey(t.date)))].sort().reverse();
+  const monthFilter = document.getElementById('monthFilter');
+  monthFilter.innerHTML = `<option value="all">Toate lunile</option>` + months.map(m => `<option value="${m}">${MM.monthLabel(m)}</option>`).join('');
+
+  const catFilter = document.getElementById('catFilter');
+  catFilter.innerHTML = `<option value="all">Toate sursele</option>` + MM.INCOME_CATEGORIES.map(c => `<option value="${MM.escapeHtml(c)}">${MM.escapeHtml(c)}</option>`).join('');
+}
+
+function renderList(){
+  const income = MM.loadIncome();
+  const monthFilter = document.getElementById('monthFilter').value;
+  const catFilter = document.getElementById('catFilter').value;
+
+  let filtered = income.slice();
+  if(monthFilter !== 'all') filtered = filtered.filter(t => MM.monthKey(t.date) === monthFilter);
+  if(catFilter !== 'all') filtered = filtered.filter(t => t.category === catFilter);
+  filtered.sort((a,b) => (b.date||'').localeCompare(a.date||''));
+
+  const total = filtered.reduce((s,t)=>s+Number(t.amount||0),0);
+  document.getElementById('filteredTotal').textContent = MM.fmtMoney(total) + ' selectat';
+
+  const el = document.getElementById('incomeList');
+  if(filtered.length === 0){
+    el.innerHTML = `<div class="empty">Niciun venit aici încă.</div>`;
+  }else{
+    el.innerHTML = filtered.map(t => `
+      <div class="tx-row">
+        <div class="tx-left">
+          <span class="tx-cat">${MM.escapeHtml(t.category)}</span>
+          <span class="tx-meta">${MM.fmtDate(t.date)}${t.notes ? ' · ' + MM.escapeHtml(t.notes) : ''}</span>
+        </div>
+        <span class="tx-amt income">+${MM.fmtMoney(t.amount)}</span>
+        <div class="tx-actions">
+          <button class="icon-btn" onclick="editIncome('${t.id}')" title="Editează">✎</button>
+          <button class="icon-btn" onclick="deleteIncome('${t.id}')" title="Șterge">🗑</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  document.getElementById('totalCount').textContent = income.length + ' venituri total';
+}
+
+window.editIncome = function(id){
+  const income = MM.loadIncome();
+  const t = income.find(x => x.id === id);
+  if(!t) return;
+  editingId = id;
+  document.getElementById('category').value = t.category;
+  document.getElementById('amount').value = t.amount;
+  document.getElementById('date').value = t.date;
+  document.getElementById('notes').value = t.notes || '';
+  document.getElementById('submitBtn').textContent = 'Salvează modificarea';
+  window.scrollTo({top:0, behavior:'smooth'});
+};
+
+window.deleteIncome = function(id){
+  if(!confirm('Ștergi acest venit?')) return;
+  let income = MM.loadIncome();
+  income = income.filter(t => t.id !== id);
+  MM.saveIncome(income);
+  populateFilters();
+  renderList();
+};
+
+document.getElementById('incomeForm').addEventListener('submit', e => {
+  e.preventDefault();
+  let income = MM.loadIncome();
+  const entry = {
+    id: editingId || MM.uid(),
+    category: document.getElementById('category').value,
+    amount: parseFloat(document.getElementById('amount').value) || 0,
+    date: document.getElementById('date').value,
+    notes: document.getElementById('notes').value.trim()
+  };
+  if(editingId){
+    income = income.map(t => t.id === editingId ? entry : t);
+  }else{
+    income.push(entry);
+  }
+  MM.saveIncome(income);
+  editingId = null;
+  document.getElementById('submitBtn').textContent = 'Adaugă venitul';
+  e.target.reset();
+  document.getElementById('date').value = new Date().toISOString().slice(0,10);
+  populateFilters();
+  renderList();
+});
+
+document.getElementById('monthFilter').addEventListener('change', renderList);
+document.getElementById('catFilter').addEventListener('change', renderList);
+
+populateFilters();
+renderList();
+</script>
+</body>
+</html>

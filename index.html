@@ -3,736 +3,154 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EaglePips — Prop Firm Portfolio</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --bg: #0a0d10;
-    --bg-elevated: #12161b;
-    --bg-card: #151a20;
-    --border: #232a32;
-    --border-soft: #1b2128;
-    --text: #e8ecef;
-    --text-dim: #8a94a0;
-    --text-faint: #565f6a;
-    --gold: #c9a04a;
-    --gold-dim: #8a7239;
-    --profit: #35c48f;
-    --profit-dim: #1f6e50;
-    --loss: #e35b5b;
-    --loss-dim: #7a3434;
-    --warn: #d4a640;
-    --radius: 10px;
-    --font-display: 'Space Grotesk', sans-serif;
-    --font-mono: 'JetBrains Mono', monospace;
-    --font-body: 'Inter', sans-serif;
-  }
-
-  *{box-sizing:border-box; margin:0; padding:0;}
-
-  body{
-    background: var(--bg);
-    background-image:
-      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(201,160,74,0.06), transparent 60%),
-      radial-gradient(ellipse 700px 500px at 100% 0%, rgba(53,196,143,0.04), transparent 60%);
-    color: var(--text);
-    font-family: var(--font-body);
-    min-height: 100vh;
-    line-height: 1.5;
-  }
-
-  .wrap{ max-width: 1180px; margin: 0 auto; padding: 0 24px 80px; }
-
-  /* ---------- HEADER ---------- */
-  header.hero{
-    padding: 56px 0 40px;
-    border-bottom: 1px solid var(--border-soft);
-    margin-bottom: 36px;
-    position: relative;
-  }
-  .eyebrow{
-    font-family: var(--font-mono);
-    font-size: 12px;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--gold);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 18px;
-  }
-  .eyebrow::before{
-    content:"";
-    width: 22px; height: 1px;
-    background: var(--gold-dim);
-  }
-  h1.title{
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: clamp(32px, 5vw, 52px);
-    letter-spacing: -0.02em;
-    line-height: 1.05;
-    max-width: 720px;
-  }
-  h1.title .accent{ color: var(--gold); }
-  .subtitle{
-    color: var(--text-dim);
-    max-width: 560px;
-    margin-top: 14px;
-    font-size: 15px;
-  }
-
-  /* ---------- SUMMARY STRIP ---------- */
-  .summary{
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1px;
-    background: var(--border-soft);
-    border: 1px solid var(--border-soft);
-    border-radius: var(--radius);
-    overflow: hidden;
-    margin-bottom: 44px;
-  }
-  .summary-cell{
-    background: var(--bg-elevated);
-    padding: 22px 24px;
-  }
-  .summary-cell .label{
-    font-family: var(--font-mono);
-    font-size: 10.5px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text-faint);
-    margin-bottom: 10px;
-  }
-  .summary-cell .value{
-    font-family: var(--font-mono);
-    font-size: 26px;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-  }
-  .summary-cell .value.pos{ color: var(--profit); }
-  .summary-cell .value.neg{ color: var(--loss); }
-  .summary-cell .sub{ font-size: 11.5px; color: var(--text-faint); margin-top: 4px; }
-
-  @media (max-width: 720px){
-    .summary{ grid-template-columns: repeat(2, 1fr); }
-  }
-
-  /* ---------- CONTROLS ---------- */
-  .controls{
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 14px;
-    margin-bottom: 22px;
-  }
-  .tabs{
-    display: flex;
-    gap: 6px;
-    background: var(--bg-elevated);
-    border: 1px solid var(--border-soft);
-    border-radius: 999px;
-    padding: 4px;
-  }
-  .tab{
-    font-family: var(--font-mono);
-    font-size: 11.5px;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    background: transparent;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 999px;
-    cursor: pointer;
-    transition: all .15s ease;
-  }
-  .tab:hover{ color: var(--text); }
-  .tab.active{ background: var(--gold); color: #14110a; font-weight: 600; }
-
-  .btn-row{ display:flex; gap: 10px; }
-  button.btn{
-    font-family: var(--font-body);
-    font-size: 13.5px;
-    font-weight: 600;
-    padding: 10px 18px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: var(--bg-elevated);
-    color: var(--text);
-    cursor: pointer;
-    transition: all .15s ease;
-  }
-  button.btn:hover{ border-color: var(--gold-dim); }
-  button.btn.primary{
-    background: var(--gold);
-    color: #14110a;
-    border-color: var(--gold);
-  }
-  button.btn.primary:hover{ background: #d9b463; }
-  button.btn.ghost{ background: transparent; }
-  button.btn.small{ padding: 6px 12px; font-size: 12px; }
-
-  /* ---------- GRID / CARDS ---------- */
-  .grid{
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 16px;
-  }
-
-  .card{
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 22px;
-    position: relative;
-    transition: border-color .15s ease, transform .15s ease;
-  }
-  .card:hover{ border-color: #313a44; }
-  .card .status-pill{
-    position: absolute;
-    top: 20px; right: 20px;
-    font-family: var(--font-mono);
-    font-size: 10px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    padding: 4px 9px;
-    border-radius: 999px;
-    border: 1px solid;
-  }
-  .status-active{ color: var(--profit); border-color: var(--profit-dim); background: rgba(53,196,143,0.08); }
-  .status-funded{ color: var(--gold); border-color: var(--gold-dim); background: rgba(201,160,74,0.08); }
-  .status-failed{ color: var(--loss); border-color: var(--loss-dim); background: rgba(227,91,91,0.08); }
-  .status-payout{ color: #6fb6e0; border-color: #2c5a76; background: rgba(111,182,224,0.08); }
-
-  .card-head{ margin-bottom: 18px; padding-right: 90px; }
-  .card-head .firm{
-    font-family: var(--font-display);
-    font-weight: 600;
-    font-size: 18px;
-  }
-  .card-head .meta{
-    font-family: var(--font-mono);
-    font-size: 11.5px;
-    color: var(--text-faint);
-    margin-top: 4px;
-  }
-
-  .card-body{
-    display: flex;
-    gap: 18px;
-    align-items: center;
-    margin-bottom: 16px;
-  }
-
-  /* altimeter gauge */
-  .gauge-wrap{ position: relative; width: 92px; height: 92px; flex-shrink: 0; }
-  .gauge-wrap svg{ transform: rotate(-90deg); }
-  .gauge-bg{ fill: none; stroke: var(--border); stroke-width: 8; }
-  .gauge-fg{ fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset .4s ease; }
-  .gauge-label{
-    position: absolute; inset: 0;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-  }
-  .gauge-label .pct{ font-family: var(--font-mono); font-size: 17px; font-weight: 700; }
-  .gauge-label .tag{ font-family: var(--font-mono); font-size: 8.5px; color: var(--text-faint); letter-spacing: 0.05em; margin-top: 1px; }
-
-  .stats-mini{ flex: 1; display: flex; flex-direction: column; gap: 8px; }
-  .stats-mini .row{ display: flex; justify-content: space-between; align-items: baseline; }
-  .stats-mini .k{ font-size: 12px; color: var(--text-dim); }
-  .stats-mini .v{ font-family: var(--font-mono); font-size: 13.5px; font-weight: 600; }
-  .v.pos{ color: var(--profit); }
-  .v.neg{ color: var(--loss); }
-
-  .card-foot{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 14px;
-    border-top: 1px solid var(--border-soft);
-  }
-  .card-foot .note{ font-size: 11.5px; color: var(--text-faint); max-width: 60%; }
-  .card-actions{ display: flex; gap: 8px; }
-  .icon-btn{
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text-dim);
-    width: 28px; height: 28px;
-    border-radius: 6px;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 13px;
-    transition: all .15s ease;
-  }
-  .icon-btn:hover{ border-color: var(--gold-dim); color: var(--gold); }
-
-  .empty{
-    text-align: center;
-    padding: 70px 20px;
-    color: var(--text-faint);
-    border: 1px dashed var(--border);
-    border-radius: var(--radius);
-    font-size: 14px;
-  }
-
-  /* ---------- MODAL ---------- */
-  .overlay{
-    position: fixed; inset: 0;
-    background: rgba(6,8,10,0.7);
-    backdrop-filter: blur(3px);
-    display: none;
-    align-items: center; justify-content: center;
-    z-index: 100;
-    padding: 20px;
-  }
-  .overlay.open{ display: flex; }
-  .modal{
-    background: var(--bg-elevated);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    width: 100%; max-width: 560px;
-    max-height: 88vh;
-    overflow-y: auto;
-    padding: 30px;
-  }
-  .modal h2{ font-family: var(--font-display); font-size: 20px; margin-bottom: 22px; }
-  .form-grid{ display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  .form-grid .full{ grid-column: 1 / -1; }
-  .field label{
-    display: block;
-    font-family: var(--font-mono);
-    font-size: 10.5px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--text-faint);
-    margin-bottom: 6px;
-  }
-  .field input, .field select, .field textarea{
-    width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 7px;
-    padding: 9px 11px;
-    color: var(--text);
-    font-family: var(--font-body);
-    font-size: 13.5px;
-  }
-  .field textarea{ resize: vertical; min-height: 50px; }
-  .field input:focus, .field select:focus, .field textarea:focus{
-    outline: none; border-color: var(--gold-dim);
-  }
-  .modal-foot{ display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
-
-  /* focus visibility */
-  a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible{
-    outline: 2px solid var(--gold); outline-offset: 2px;
-  }
-
-  footer{
-    margin-top: 60px;
-    padding-top: 24px;
-    border-top: 1px solid var(--border-soft);
-    color: var(--text-faint);
-    font-size: 12px;
-    font-family: var(--font-mono);
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-
-  @media (prefers-reduced-motion: reduce){
-    *{ transition: none !important; }
-  }
-
-  input[type="file"]{ display:none; }
-</style>
+<title>EaglePips — Overview</title>
+<link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
+
+<nav class="topnav">
+  <div class="topnav-inner">
+    <div class="brand"><span class="dot">●</span> EaglePips <span class="sub">Money Management</span></div>
+    <div class="navlinks">
+      <a href="index.html" data-page="overview">Overview</a>
+      <a href="spendings.html" data-page="spendings">Spendings</a>
+      <a href="income.html" data-page="income">Income</a>
+    </div>
+  </div>
+</nav>
 
 <div class="wrap">
 
   <header class="hero">
-    <div class="eyebrow">EaglePips · Cont Portfolio</div>
-    <h1 class="title">Evidența conturilor <span class="accent">prop firm</span>.</h1>
-    <p class="subtitle">Toate conturile tale de trading pe fonduri — evaluări, conturi finanțate, payout-uri — într-un singur loc, actualizat manual, fără reguli de firmă care se pierd în notițe.</p>
+    <div class="eyebrow">Dashboard</div>
+    <h1 class="title">Vezi unde stai <span class="accent">luna asta</span>.</h1>
+    <p class="subtitle">Venituri, cheltuieli și sold, actualizate din paginile Spendings și Income.</p>
   </header>
 
-  <section class="summary" id="summary">
-    <!-- filled by JS -->
-  </section>
+  <div class="month-selector" id="monthSelector">
+    <button id="prevMonth" aria-label="Luna anterioară">‹</button>
+    <span class="label" id="monthLabel"></span>
+    <button id="nextMonth" aria-label="Luna următoare">›</button>
+  </div>
 
-  <div class="controls">
-    <div class="tabs" id="tabs">
-      <button class="tab active" data-filter="all">Toate</button>
-      <button class="tab" data-filter="active">Active</button>
-      <button class="tab" data-filter="funded">Funded</button>
-      <button class="tab" data-filter="payout">Payout</button>
-      <button class="tab" data-filter="failed">Failed</button>
+  <section class="summary" id="summary"></section>
+
+  <div class="two-col">
+    <div class="panel">
+      <div class="panel-head">
+        <h3>Cheltuieli pe categorii</h3>
+        <span class="hint">luna selectată</span>
+      </div>
+      <div id="categoryBreakdown"></div>
     </div>
-    <div class="btn-row">
-      <button class="btn" id="exportBtn">Export JSON</button>
-      <button class="btn" id="importBtn">Import JSON</button>
-      <input type="file" id="importFile" accept="application/json">
-      <button class="btn primary" id="addBtn">+ Cont nou</button>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h3>Ultimele tranzacții</h3>
+        <span class="hint">toate</span>
+      </div>
+      <div class="tx-list" id="recentTx"></div>
     </div>
   </div>
 
-  <div class="grid" id="grid"></div>
-
   <footer>
-    <span>EaglePips Portfolio · datele sunt salvate local în acest browser</span>
-    <span id="countFoot">0 conturi</span>
+    <span>EaglePips Money Management · datele sunt salvate local în acest browser</span>
+    <span id="totalCount"></span>
   </footer>
 </div>
 
-<!-- MODAL -->
-<div class="overlay" id="overlay">
-  <div class="modal">
-    <h2 id="modalTitle">Cont nou</h2>
-    <form id="accountForm">
-      <input type="hidden" id="accountId">
-      <div class="form-grid">
-        <div class="field full">
-          <label for="firm">Firmă</label>
-          <input type="text" id="firm" placeholder="The5ers" required>
-        </div>
-        <div class="field">
-          <label for="accType">Tip</label>
-          <select id="accType">
-            <option>Forex</option>
-            <option>Futures</option>
-            <option>Indices</option>
-            <option>Crypto</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="phase">Fază</label>
-          <select id="phase">
-            <option>Evaluare — Faza 1</option>
-            <option>Evaluare — Faza 2</option>
-            <option>Funded</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="size">Mărime cont ($)</label>
-          <input type="number" id="size" placeholder="50000" required>
-        </div>
-        <div class="field">
-          <label for="balance">Balanță curentă ($)</label>
-          <input type="number" id="balance" placeholder="52300" required>
-        </div>
-        <div class="field">
-          <label for="maxDD">Max drawdown total (%)</label>
-          <input type="number" id="maxDD" placeholder="10" step="0.1">
-        </div>
-        <div class="field">
-          <label for="ddUsed">Drawdown folosit (%)</label>
-          <input type="number" id="ddUsed" placeholder="3.2" step="0.1">
-        </div>
-        <div class="field">
-          <label for="startDate">Data start</label>
-          <input type="date" id="startDate">
-        </div>
-        <div class="field">
-          <label for="payoutDate">Următorul payout</label>
-          <input type="date" id="payoutDate">
-        </div>
-        <div class="field full">
-          <label for="status">Status</label>
-          <select id="status">
-            <option value="active">Activ</option>
-            <option value="funded">Funded</option>
-            <option value="payout">Payout în așteptare</option>
-            <option value="failed">Failed</option>
-          </select>
-        </div>
-        <div class="field full">
-          <label for="notes">Notițe</label>
-          <textarea id="notes" placeholder="ex: cont futures, regulă trailing DD, discord support..."></textarea>
-        </div>
-      </div>
-      <div class="modal-foot">
-        <button type="button" class="btn ghost" id="cancelBtn">Anulează</button>
-        <button type="submit" class="btn primary">Salvează</button>
-      </div>
-    </form>
-  </div>
-</div>
-
+<script src="assets/app.js"></script>
 <script>
-const STORAGE_KEY = 'eaglepips_propfirm_accounts';
+MM.highlightNav('overview');
 
-function loadAccounts(){
-  try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  }catch(e){ return []; }
-}
-function saveAccounts(list){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-}
-
-let accounts = loadAccounts();
-let currentFilter = 'all';
-
-// seed with an example the first time so the page isn't empty/confusing
-if(accounts.length === 0 && localStorage.getItem(STORAGE_KEY) === null){
-  accounts = [
-    {
-      id: crypto.randomUUID(),
-      firm: 'The5ers',
-      accType: 'Futures',
-      phase: 'Funded',
-      size: 50000,
-      balance: 52840,
-      maxDD: 10,
-      ddUsed: 2.1,
-      startDate: '2026-04-01',
-      payoutDate: '2026-08-01',
-      status: 'funded',
-      notes: 'Cont principal futures — payout bi-lunar'
-    }
-  ];
-  saveAccounts(accounts);
-}
-
-const STATUS_LABEL = {
-  active: 'Activ',
-  funded: 'Funded',
-  payout: 'Payout',
-  failed: 'Failed'
-};
-
-function fmtMoney(n){
-  return '$' + Number(n).toLocaleString('en-US', {maximumFractionDigits: 0});
-}
-
-function renderSummary(){
-  const totalCapital = accounts.filter(a => a.status !== 'failed').reduce((s,a) => s + Number(a.size||0), 0);
-  const activeCount = accounts.filter(a => a.status === 'active' || a.status === 'funded' || a.status === 'payout').length;
-  const passed = accounts.filter(a => a.status === 'funded' || a.status === 'payout').length;
-  const failed = accounts.filter(a => a.status === 'failed').length;
-  const passRate = (passed + failed) > 0 ? Math.round((passed/(passed+failed))*100) : 0;
-
-  const el = document.getElementById('summary');
-  el.innerHTML = `
-    <div class="summary-cell">
-      <div class="label">Capital gestionat</div>
-      <div class="value">${fmtMoney(totalCapital)}</div>
-      <div class="sub">${accounts.length} cont(uri) total</div>
-    </div>
-    <div class="summary-cell">
-      <div class="label">Conturi active</div>
-      <div class="value">${activeCount}</div>
-      <div class="sub">evaluare + funded + payout</div>
-    </div>
-    <div class="summary-cell">
-      <div class="label">Rată de trecere</div>
-      <div class="value">${passRate}%</div>
-      <div class="sub">${passed} trecute · ${failed} eșuate</div>
-    </div>
-  `;
-}
-
-function gaugeSvg(pct, danger){
-  const r = 38, c = 2*Math.PI*r;
-  const clamped = Math.max(0, Math.min(100, pct));
-  const offset = c - (clamped/100)*c;
-  const color = danger ? 'var(--loss)' : (clamped > 70 ? 'var(--warn)' : 'var(--profit)');
-  return `
-    <div class="gauge-wrap">
-      <svg width="92" height="92" viewBox="0 0 92 92">
-        <circle class="gauge-bg" cx="46" cy="46" r="${r}"></circle>
-        <circle class="gauge-fg" cx="46" cy="46" r="${r}"
-          stroke="${color}"
-          stroke-dasharray="${c}"
-          stroke-dashoffset="${offset}"></circle>
-      </svg>
-      <div class="gauge-label">
-        <div class="pct">${clamped.toFixed(1)}%</div>
-        <div class="tag">DD folosit</div>
-      </div>
-    </div>
-  `;
-}
-
-function renderGrid(){
-  const grid = document.getElementById('grid');
-  const filtered = currentFilter === 'all' ? accounts : accounts.filter(a => a.status === currentFilter);
-
-  document.getElementById('countFoot').textContent = accounts.length + (accounts.length === 1 ? ' cont' : ' conturi');
-
-  if(filtered.length === 0){
-    grid.innerHTML = `<div class="empty" style="grid-column:1/-1">Niciun cont în această categorie. Apasă „+ Cont nou” ca să adaugi unul.</div>`;
-    return;
-  }
-
-  grid.innerHTML = filtered.map(a => {
-    const ddPct = Number(a.ddUsed||0) / (Number(a.maxDD||10)) * 100;
-    const danger = ddPct >= 80;
-    return `
-    <div class="card" data-id="${a.id}">
-      <span class="status-pill status-${a.status}">${STATUS_LABEL[a.status] || a.status}</span>
-      <div class="card-head">
-        <div class="firm">${escapeHtml(a.firm)}</div>
-        <div class="meta">${a.accType} · ${a.phase}</div>
-      </div>
-      <div class="card-body">
-        ${gaugeSvg(ddPct, danger)}
-        <div class="stats-mini">
-          <div class="row"><span class="k">Mărime cont</span><span class="v">${fmtMoney(a.size)}</span></div>
-          <div class="row"><span class="k">Balanță</span><span class="v">${fmtMoney(a.balance)}</span></div>
-          ${a.payoutDate ? `<div class="row"><span class="k">Următor payout</span><span class="v">${a.payoutDate}</span></div>` : ''}
-        </div>
-      </div>
-      <div class="card-foot">
-        <div class="note">${escapeHtml(a.notes || '')}</div>
-        <div class="card-actions">
-          <button class="icon-btn" onclick="editAccount('${a.id}')" title="Editează">✎</button>
-          <button class="icon-btn" onclick="deleteAccount('${a.id}')" title="Șterge">🗑</button>
-        </div>
-      </div>
-    </div>
-    `;
-  }).join('');
-}
-
-function escapeHtml(s){
-  return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-}
+let currentMonth = MM.currentMonthKey();
 
 function render(){
-  renderSummary();
-  renderGrid();
-}
+  const income = MM.loadIncome();
+  const spending = MM.loadSpending();
 
-// ---- tabs ----
-document.getElementById('tabs').addEventListener('click', e => {
-  if(e.target.classList.contains('tab')){
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    e.target.classList.add('active');
-    currentFilter = e.target.dataset.filter;
-    render();
-  }
-});
+  document.getElementById('monthLabel').textContent = MM.monthLabel(currentMonth);
 
-// ---- modal open/close ----
-const overlay = document.getElementById('overlay');
-const form = document.getElementById('accountForm');
+  const monthIncome = income.filter(t => MM.monthKey(t.date) === currentMonth);
+  const monthSpending = spending.filter(t => MM.monthKey(t.date) === currentMonth);
 
-function openModal(edit){
-  document.getElementById('modalTitle').textContent = edit ? 'Editează cont' : 'Cont nou';
-  overlay.classList.add('open');
-}
-function closeModal(){
-  overlay.classList.remove('open');
-  form.reset();
-  document.getElementById('accountId').value = '';
-}
+  const totalIncomeMonth = monthIncome.reduce((s,t)=>s+Number(t.amount||0),0);
+  const totalSpendingMonth = monthSpending.reduce((s,t)=>s+Number(t.amount||0),0);
+  const netMonth = totalIncomeMonth - totalSpendingMonth;
 
-document.getElementById('addBtn').addEventListener('click', () => {
-  form.reset();
-  document.getElementById('accountId').value = '';
-  openModal(false);
-});
-document.getElementById('cancelBtn').addEventListener('click', closeModal);
-overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); });
+  const totalIncomeAll = income.reduce((s,t)=>s+Number(t.amount||0),0);
+  const totalSpendingAll = spending.reduce((s,t)=>s+Number(t.amount||0),0);
+  const balanceAll = totalIncomeAll - totalSpendingAll;
 
-window.editAccount = function(id){
-  const a = accounts.find(x => x.id === id);
-  if(!a) return;
-  document.getElementById('accountId').value = a.id;
-  document.getElementById('firm').value = a.firm;
-  document.getElementById('accType').value = a.accType;
-  document.getElementById('phase').value = a.phase;
-  document.getElementById('size').value = a.size;
-  document.getElementById('balance').value = a.balance;
-  document.getElementById('maxDD').value = a.maxDD;
-  document.getElementById('ddUsed').value = a.ddUsed;
-  document.getElementById('startDate').value = a.startDate || '';
-  document.getElementById('payoutDate').value = a.payoutDate || '';
-  document.getElementById('status').value = a.status;
-  document.getElementById('notes').value = a.notes || '';
-  openModal(true);
-};
+  document.getElementById('summary').innerHTML = `
+    <div class="summary-cell">
+      <div class="label">Venituri luna asta</div>
+      <div class="value pos">${MM.fmtMoney(totalIncomeMonth)}</div>
+      <div class="sub">${monthIncome.length} tranzacții</div>
+    </div>
+    <div class="summary-cell">
+      <div class="label">Cheltuieli luna asta</div>
+      <div class="value neg">${MM.fmtMoney(totalSpendingMonth)}</div>
+      <div class="sub">${monthSpending.length} tranzacții</div>
+    </div>
+    <div class="summary-cell">
+      <div class="label">Sold net — luna asta</div>
+      <div class="value ${netMonth>=0?'pos':'neg'}">${netMonth>=0?'+':''}${MM.fmtMoney(netMonth)}</div>
+      <div class="sub">venituri − cheltuieli</div>
+    </div>
+    <div class="summary-cell">
+      <div class="label">Sold cumulat</div>
+      <div class="value ${balanceAll>=0?'pos':'neg'}">${balanceAll>=0?'+':''}${MM.fmtMoney(balanceAll)}</div>
+      <div class="sub">de la început</div>
+    </div>
+  `;
 
-window.deleteAccount = function(id){
-  if(!confirm('Ștergi acest cont din portofoliu?')) return;
-  accounts = accounts.filter(a => a.id !== id);
-  saveAccounts(accounts);
-  render();
-};
+  // category breakdown (spending, this month)
+  const byCat = {};
+  monthSpending.forEach(t => { byCat[t.category] = (byCat[t.category]||0) + Number(t.amount||0); });
+  const catEntries = Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+  const maxCat = catEntries.length ? catEntries[0][1] : 0;
 
-form.addEventListener('submit', e => {
-  e.preventDefault();
-  const id = document.getElementById('accountId').value;
-  const data = {
-    id: id || crypto.randomUUID(),
-    firm: document.getElementById('firm').value.trim(),
-    accType: document.getElementById('accType').value,
-    phase: document.getElementById('phase').value,
-    size: parseFloat(document.getElementById('size').value) || 0,
-    balance: parseFloat(document.getElementById('balance').value) || 0,
-    maxDD: parseFloat(document.getElementById('maxDD').value) || 10,
-    ddUsed: parseFloat(document.getElementById('ddUsed').value) || 0,
-    startDate: document.getElementById('startDate').value,
-    payoutDate: document.getElementById('payoutDate').value,
-    status: document.getElementById('status').value,
-    notes: document.getElementById('notes').value.trim()
-  };
-  if(id){
-    accounts = accounts.map(a => a.id === id ? data : a);
+  const catEl = document.getElementById('categoryBreakdown');
+  if(catEntries.length === 0){
+    catEl.innerHTML = `<div class="empty">Nicio cheltuială înregistrată luna asta. <a href="spendings.html" style="color:var(--gold)">Adaugă una →</a></div>`;
   }else{
-    accounts.push(data);
+    catEl.innerHTML = catEntries.map(([cat,amt]) => `
+      <div class="bar-row">
+        <div class="bar-top"><span class="cat">${MM.escapeHtml(cat)}</span><span class="amt">${MM.fmtMoney(amt)}</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:${maxCat ? (amt/maxCat*100) : 0}%"></div></div>
+      </div>
+    `).join('');
   }
-  saveAccounts(accounts);
-  closeModal();
-  render();
-});
 
-// ---- export / import ----
-document.getElementById('exportBtn').addEventListener('click', () => {
-  const blob = new Blob([JSON.stringify(accounts, null, 2)], {type: 'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'eaglepips-portfolio-' + new Date().toISOString().slice(0,10) + '.json';
-  a.click();
-  URL.revokeObjectURL(url);
-});
+  // recent transactions (merged, all time, last 8)
+  const merged = [
+    ...income.map(t => ({...t, kind: 'income'})),
+    ...spending.map(t => ({...t, kind: 'spending'}))
+  ].sort((a,b) => (b.date||'').localeCompare(a.date||'')).slice(0,8);
 
-document.getElementById('importBtn').addEventListener('click', () => {
-  document.getElementById('importFile').click();
-});
-document.getElementById('importFile').addEventListener('change', e => {
-  const file = e.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = evt => {
-    try{
-      const parsed = JSON.parse(evt.target.result);
-      if(Array.isArray(parsed)){
-        accounts = parsed;
-        saveAccounts(accounts);
-        render();
-        alert('Import reușit: ' + parsed.length + ' conturi.');
-      }else{
-        alert('Fișierul nu are formatul așteptat (listă de conturi).');
-      }
-    }catch(err){
-      alert('Fișier JSON invalid.');
-    }
-  };
-  reader.readAsText(file);
-  e.target.value = '';
-});
+  const txEl = document.getElementById('recentTx');
+  if(merged.length === 0){
+    txEl.innerHTML = `<div class="empty">Nicio tranzacție încă. Adaugă din <a href="income.html" style="color:var(--gold)">Income</a> sau <a href="spendings.html" style="color:var(--gold)">Spendings</a>.</div>`;
+  }else{
+    txEl.innerHTML = merged.map(t => `
+      <div class="tx-row">
+        <div class="tx-left">
+          <span class="tx-cat">${MM.escapeHtml(t.category)}</span>
+          <span class="tx-meta">${MM.fmtDate(t.date)}${t.notes ? ' · ' + MM.escapeHtml(t.notes) : ''}</span>
+        </div>
+        <span class="tx-amt ${t.kind}">${t.kind==='income'?'+':'−'}${MM.fmtMoney(t.amount)}</span>
+      </div>
+    `).join('');
+  }
+
+  document.getElementById('totalCount').textContent = (income.length + spending.length) + ' tranzacții total';
+}
+
+document.getElementById('prevMonth').addEventListener('click', () => { currentMonth = MM.shiftMonthKey(currentMonth, -1); render(); });
+document.getElementById('nextMonth').addEventListener('click', () => { currentMonth = MM.shiftMonthKey(currentMonth, 1); render(); });
 
 render();
 </script>
-
 </body>
 </html>
